@@ -11,9 +11,11 @@ public class Server implements Observer
 {
 	private static Server data = new Server();
 	
-//	private List<Player> players;
+	private List<Player> players = new ArrayList<Player>();
 	
 	public List<Socket> clients = new ArrayList<Socket>();
+	
+	public String[] teams = {"Blue","Vermelho", "Verde", "Amarelo"};
 	
 	public ServerSocket server;
 	
@@ -106,23 +108,73 @@ public class Server implements Observer
 	}
 	
 	@Override
-	public void update(Observable o, Object arg) {
+	public void update(Observable o, Object arg)
+	{
 		// TODO Auto-generated method stub
+		
+		MessageHandler handler = (MessageHandler) o;
 		
 		HashMap<String, Object> map = (HashMap<String, Object>) arg;
 		
-		String content = map.toString();
-		
-		byte[] bytes = content.getBytes();
-		
-		System.out.println("Reenviando mensagem para clientes. Conteudo:");
-		System.out.println(content);
-		
-		//Reenvia a mensagem para todos os clientes
-		for (Socket client : clients) {
+		//AUTENTICACAO
+		if (map.containsKey("nickname"))
+		{
+			String currentTeam = this.teams[0];
 			
+			//Encontra o time correto
+			for (int i = 0; i < this.players.size(); i++)
+			{
+				if (currentTeam == this.players.get(i).team)
+				{
+					if(i < this.players.size() - 1)
+					{
+						currentTeam = this.players.get(i+1).team;
+					}
+					else
+					{
+						return;
+					}
+				}
+			}
+			
+			Player player = new Player(handler.client, (String) map.get("nickname"), currentTeam);
+			this.players.add(player);
+			
+			String message = "Cliente " + player.nickname + " conectou-se com o time " + currentTeam;  
+			
+			System.out.println(message);
+			
+			//Encontra o cliente que efetuou a autenticacao
+			this.clients.remove(handler.client);
+			
+			String content = map.toString();
+			
+			byte[] bytes = content.getBytes();
+			
+			this.sendToAllClients(bytes);
+
+		}
+		//Outros eventos
+		else
+		{
+			String content = map.toString();
+			
+			byte[] bytes = content.getBytes();
+			
+			System.out.println("Reenviando mensagem para clientes. Conteudo:");
+			System.out.println(content);
+			
+			this.sendToAllClients(bytes);
+
+		}
+	}
+	
+	void sendToAllClients(byte[] bytes)
+	{
+		//Reenvia a mensagem para todos os clientes
+		for (Socket client : clients)
+		{	
 			this.sendMessage(client, bytes);
 		}
-		
 	}
 }
