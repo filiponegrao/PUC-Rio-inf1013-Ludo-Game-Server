@@ -15,7 +15,7 @@ public class Server implements Observer
 	
 	public List<Socket> clients = new ArrayList<Socket>();
 	
-	public String[] teams = {"Blue","Vermelho", "Verde", "Amarelo"};
+	public String[] teams = {"Azul","Vermelho", "Verde", "Amarelo"};
 	
 	public ServerSocket server;
 	
@@ -119,16 +119,16 @@ public class Server implements Observer
 		//AUTENTICACAO
 		if (map.containsKey("nickname"))
 		{
-			String currentTeam = this.teams[0];
+			String currentTeam = this.teams[0];;
 			
 			//Encontra o time correto
 			for (int i = 0; i < this.players.size(); i++)
 			{
 				if (currentTeam == this.players.get(i).team)
 				{
-					if(i < this.players.size() - 1)
+					if(i < this.teams.length - 1)
 					{
-						currentTeam = this.players.get(i+1).team;
+						currentTeam = this.teams[i+1];
 					}
 					else
 					{
