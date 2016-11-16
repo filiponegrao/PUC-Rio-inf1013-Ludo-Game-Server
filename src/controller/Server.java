@@ -6,6 +6,7 @@ import java.util.*;
 import javax.swing.text.AbstractDocument.LeafElement;
 
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 
 public class Server implements Observer
 {
@@ -151,7 +152,7 @@ public class Server implements Observer
 			
 			byte[] bytes = content.getBytes();
 			
-			this.sendToAllClients(bytes);
+			this.sendToAllPlayers(bytes);
 
 		}
 		//Outros eventos
@@ -160,21 +161,22 @@ public class Server implements Observer
 			String content = map.toString();
 			
 			byte[] bytes = content.getBytes();
-			
-			System.out.println("Reenviando mensagem para clientes. Conteudo:");
-			System.out.println(content);
-			
-			this.sendToAllClients(bytes);
+						
+			this.sendToAllPlayers(bytes);
 
 		}
 	}
 	
-	void sendToAllClients(byte[] bytes)
+	void sendToAllPlayers(byte[] bytes)
 	{
+		System.out.println("Reenviando mensagem para clientes. Conteudo:");
+		String content = new String(bytes, StandardCharsets.UTF_8);
+		System.out.println(content);
+		
 		//Reenvia a mensagem para todos os clientes
-		for (Socket client : clients)
+		for (Player player : this.players)
 		{	
-			this.sendMessage(client, bytes);
+			this.sendMessage(player.socket, bytes);
 		}
 	}
 }
