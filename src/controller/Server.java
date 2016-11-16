@@ -148,12 +148,13 @@ public class Server implements Observer
 			//Encontra o cliente que efetuou a autenticacao
 			this.clients.remove(handler.client);
 			
+			map.put("team", currentTeam);
+			
 			String content = map.toString();
 			
 			byte[] bytes = content.getBytes();
 			
 			this.sendToAllPlayers(bytes);
-
 		}
 		//Outros eventos
 		else
