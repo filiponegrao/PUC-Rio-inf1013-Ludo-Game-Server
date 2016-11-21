@@ -1,5 +1,6 @@
 package controller;
 
+import model.*;
 import java.io.*;
 import java.util.*;
 
@@ -150,8 +151,8 @@ public class Server implements Observer
 			
 			map.put("team", currentTeam);
 			
-			String content = map.toString();
-			
+			String content = map.toString() + "\n";
+						
 			byte[] bytes = content.getBytes();
 			
 			this.sendToAllPlayers(bytes);
@@ -159,7 +160,7 @@ public class Server implements Observer
 		//Outros eventos
 		else
 		{
-			String content = map.toString();
+			String content = map.toString() + "\n";
 			
 			byte[] bytes = content.getBytes();
 						
@@ -171,9 +172,9 @@ public class Server implements Observer
 	void sendToAllPlayers(byte[] bytes)
 	{
 		System.out.println("Reenviando mensagem para clientes. Conteudo:");
-		String content = new String(bytes, StandardCharsets.UTF_8);
-		System.out.println(content);
 		
+		String content = new String(bytes, StandardCharsets.UTF_8);
+				
 		//Reenvia a mensagem para todos os clientes
 		for (Player player : this.players)
 		{	
