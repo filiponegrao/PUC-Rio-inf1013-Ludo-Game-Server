@@ -3,6 +3,7 @@ package controller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
@@ -39,7 +40,16 @@ public class MessageHandler extends Observable implements Runnable
 				{
 					String content = scanner.nextLine();
 					
-					map = this.stringToHashMap(content);
+					System.out.println(content);
+					
+					if (content.contains("game"))
+					{
+						map = this.stringToHashMapGame(content);
+					}
+					else
+					{
+						map = this.stringToHashMap(content);
+					}
 					
 					//da o update
 					this.setChanged();
@@ -56,6 +66,7 @@ public class MessageHandler extends Observable implements Runnable
 			return;
 		}
 	}
+	
 	
 	/**
 	 * Funcao que transforma uma string com um formato de map
@@ -78,6 +89,45 @@ public class MessageHandler extends Observable implements Runnable
 			
 			map.put(key, value);
 		}
+		
+		return map;
+	}
+	
+	/**
+	 * Funcao que transforma uma string com um formato de map
+	 * em um map e o retorna.  */
+	public HashMap<String, Object> stringToHashMapGame(String s)
+	{
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		
+		String[] elements = s.split("game=");
+		
+		String dicestring = elements[0];
+
+		dicestring = dicestring.replace(",", "");
+		dicestring = dicestring.replace(" ", "");
+		dicestring = dicestring.replace("=", "");
+		dicestring = dicestring.replace("dice", "");
+		dicestring = dicestring.replace("{", "");
+		int dicevalue = Integer.parseInt(dicestring);
+		
+		String arraystring = elements[1];
+		System.out.println(arraystring);
+		arraystring = arraystring.replace("[", "");
+		arraystring = arraystring.replace("]", "");
+		arraystring = arraystring.replace("}", "");
+		
+		String[] strings = arraystring.split(", ");
+		
+		ArrayList<String> infos = new ArrayList<String>();
+		
+		for (String info : strings)
+		{
+			infos.add(info);
+		}
+
+		map.put("game", infos);
+		map.put("dice", dicevalue);
 		
 		return map;
 	}
