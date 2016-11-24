@@ -52,7 +52,7 @@ public class Server implements Observer
 			@Override
 			public void run()
 			{
-				while(clients.size() <= 4)
+				while(players.size() <= 4)
 				{
 					try {
 						Socket client =  server.accept();
@@ -73,7 +73,7 @@ public class Server implements Observer
 					
 				}
 				
-				if(clients.size() == 4)
+				if(players.size() == 4)
 				{
 					return;
 				}
@@ -144,7 +144,8 @@ public class Server implements Observer
 			
 			String message = "Cliente " + player.nickname + " conectou-se com o time " + currentTeam;  
 			
-			System.out.println(message);
+			System.out.println(message);		
+			
 			
 			//Encontra o cliente que efetuou a autenticacao
 			this.clients.remove(handler.client);
@@ -156,6 +157,9 @@ public class Server implements Observer
 			byte[] bytes = content.getBytes();
 			
 			this.sendToAllPlayers(bytes);
+			
+			//enviar para jogador que logou os abiguinhos conectados
+			this.sendOpponents(player);
 		}
 		//Outros eventos
 		else
@@ -169,6 +173,24 @@ public class Server implements Observer
 		}
 	}
 	
+	//envia para jogador que logou seus oponentes já conectados
+	void sendOpponents(Player player)
+	{
+		Map<String, Object> map = new HashMap<String, Object>();
+		
+		for(int i=0; i<this.players.size(); i++)
+		{
+			if(!this.players.get(i).nickname.equals(player.nickname));
+			{
+				map.put("nickname", this.players.get(i).nickname);
+				map.put("team", this.players.get(i).team);
+				String content = map.toString() + "\n";
+				byte[] bytes = content.getBytes();
+				this.sendMessage(player.socket, bytes);
+			}	
+		}		
+	}
+	
 	void sendToAllPlayers(byte[] bytes)
 	{
 		System.out.println("Reenviando mensagem para clientes. Conteudo:");
@@ -179,6 +201,16 @@ public class Server implements Observer
 		for (Player player : this.players)
 		{	
 			this.sendMessage(player.socket, bytes);
+		}
+	}
+	
+	void printLoggedClients()
+	{
+		System.out.println("Clientes online:");
+
+		for (Player player : players) 
+		{
+			System.out.println(player.nickname);
 		}
 	}
 }
