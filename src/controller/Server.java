@@ -118,6 +118,8 @@ public class Server implements Observer
 		
 		HashMap<String, Object> map = (HashMap<String, Object>) arg;
 		
+		System.out.println(map.toString());
+		
 		//AUTENTICACAO
 		if (map.containsKey("nickname"))
 		{
@@ -141,25 +143,22 @@ public class Server implements Observer
 			
 			Player player = new Player(handler.client, (String) map.get("nickname"), currentTeam);
 			this.players.add(player);
-			
-			String message = "Cliente " + player.nickname + " conectou-se com o time " + currentTeam;  
-			
-			System.out.println(message);		
-			
-			
+									
 			//Encontra o cliente que efetuou a autenticacao
 			this.clients.remove(handler.client);
 			
-			map.put("team", currentTeam);
 			
+			map.put("team", currentTeam);
 			String content = map.toString() + "\n";
-						
 			byte[] bytes = content.getBytes();
 			
+			//Avisa para os outros jogadores que esse jogador entrou
 			this.sendToAllPlayers(bytes);
 			
-			//enviar para jogador que logou os abiguinhos conectados
-			this.sendOpponents(player);
+			//Avisa para o jogador que logou os abiguinhos que ja estavam conectados
+			this.sendOpponentsToPlayer(player);
+			
+			this.printLoggedClients();
 		}
 		//Outros eventos
 		else
@@ -169,34 +168,30 @@ public class Server implements Observer
 			byte[] bytes = content.getBytes();
 						
 			this.sendToAllPlayers(bytes);
-
 		}
 	}
 	
 	//envia para jogador que logou seus oponentes já conectados
-	void sendOpponents(Player player)
-	{
-		Map<String, Object> map = new HashMap<String, Object>();
-		
-		for(int i=0; i<this.players.size(); i++)
-		{
-			if(!this.players.get(i).nickname.equals(player.nickname));
+	void sendOpponentsToPlayer(Player player)
+	{	
+		for (Player p : this.players) {
+			
+			//pega um jogador diferente do passado como parametro
+			if(p.nickname != player.nickname)
 			{
-				map.put("nickname", this.players.get(i).nickname);
-				map.put("team", this.players.get(i).team);
+				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("nickname", p.nickname);
+				map.put("team", p.team);
+				
 				String content = map.toString() + "\n";
 				byte[] bytes = content.getBytes();
 				this.sendMessage(player.socket, bytes);
-			}	
-		}		
+			}
+		}	
 	}
 	
 	void sendToAllPlayers(byte[] bytes)
-	{
-		System.out.println("Reenviando mensagem para clientes. Conteudo:");
-		
-		String content = new String(bytes, StandardCharsets.UTF_8);
-				
+	{						
 		//Reenvia a mensagem para todos os clientes
 		for (Player player : this.players)
 		{	
@@ -213,4 +208,5 @@ public class Server implements Observer
 			System.out.println(player.nickname);
 		}
 	}
+	
 }
