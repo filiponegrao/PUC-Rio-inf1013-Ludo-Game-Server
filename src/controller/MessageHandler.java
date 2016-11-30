@@ -42,7 +42,7 @@ public class MessageHandler extends Observable implements Runnable
 				{
 				    String content = scanner.nextLine();
 				    
-				    if (content.contains("game"))
+				    if (content.contains("game="))
 				    {
 				    	map = this.stringToHashMapGame(content);
 				    }
@@ -58,6 +58,8 @@ public class MessageHandler extends Observable implements Runnable
 			}
 			
 			scanner.close();
+			Server.sharedInstance().freePlayers();
+			System.exit(0);
 						
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -112,7 +114,8 @@ public class MessageHandler extends Observable implements Runnable
 		String currentTeam = teamString.substring(0, comaIndex);
 		
 		//Valor do dado
-		String diceValue = mapGame.split("diceValue=")[1].substring(0, 1);
+		String diceValue = mapGame.split("diceValue=")[1];
+		diceValue = diceValue.split(",")[0];
 		
 		String tokenCoords = Pattern.quote("],[");
 		String tokenTeams = Pattern.quote("]],");

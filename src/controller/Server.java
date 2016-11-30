@@ -1,15 +1,19 @@
 package controller;
 
 import model.*;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.*;
 import java.util.*;
 
 import javax.swing.text.AbstractDocument.LeafElement;
+import javax.swing.Timer;
 
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 
-public class Server implements Observer
+public class Server implements Observer, ActionListener
 {
 	private static Server data = new Server();
 	
@@ -20,6 +24,10 @@ public class Server implements Observer
 	public String[] teams = {"Azul","Vermelho", "Verde", "Amarelo"};
 	
 	public ServerSocket server;
+	
+	private int delay = 180000;
+	private Timer timer = new Timer(this.delay, this);
+	
 	
 	public Server() 
 	{		
@@ -56,6 +64,7 @@ public class Server implements Observer
 				{
 					try {
 						Socket client =  server.accept();
+						
 						clients.add(client);
 						
 						System.out.println("Cliente entrou");
@@ -65,7 +74,7 @@ public class Server implements Observer
 						Thread thread = new Thread(handler);
 						
 						thread.start();
-
+						
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -144,6 +153,14 @@ public class Server implements Observer
 			Player player = new Player(handler.client, (String) map.get("nickname"), currentTeam);
 			this.players.add(player);
 									
+			if(players.size() == 1)
+			{
+				this.timer.start();
+			}
+			else if (players.size() == 4)
+			{
+				this.timer.stop();
+			}
 			//Encontra o cliente que efetuou a autenticacao
 			this.clients.remove(handler.client);
 			
@@ -209,4 +226,37 @@ public class Server implements Observer
 		}
 	}
 	
+	public void sendTimeOut()
+	{
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("timeout", "timeout");
+		
+		String content = map.toString() + "\n";
+		byte[] bytes = content.getBytes();
+		
+		this.sendToAllPlayers(bytes);
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) 
+	{
+		// TODO Auto-generated method stub
+		System.out.println("encerrando por falta de jogadores");
+		this.sendTimeOut();
+		System.exit(0);
+		
+	}
+	
+	public void freePlayers()
+	{
+		for (Player player : this.players)
+		{
+			try {
+				player.socket.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
 }
